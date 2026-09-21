@@ -212,14 +212,11 @@ const renderFeatureCase = (feature) => {
     <section class="case-closing" aria-label="案例说明"><p>以上是我在项目中的部分工作，重点呈现具体问题、设计判断与交互证据。</p></section>
   </section>`;
 };
-const renderKoalaCase = () => `<section class="feature-case koala-case">
-  <header class="feature-intro"><p class="feature-kicker">DIY 绘图工具</p><h2>让玩家不用先学会工具，也能开始画</h2><p>DIY 图案可以应用到服装、家具和地面。这个优化从玩家开始创作时的阻碍出发，重新组织画布、工具和输入方式之间的关系。</p></header>
-  <div class="case-question"><span>设计输入</span><p>我获得了团队提供的部分 CE 测试结论，用于理解“进入后不知道如何开始”“工具难找”等问题；测试由其他成员开展，我没有参与测试执行。</p></div>
-  <section class="case-secondary case-systems">
-    <header><p class="feature-kicker">方案与原型</p><h2>把操作规则做成可以直接演示的交互</h2></header>
+const renderKoalaCase = () => `<section class="case-secondary case-systems">
+    <header><p class="feature-kicker">项目案例</p><h2>从具体的体验问题说起</h2></header>
     <div class="case-secondary-list">
       <article>
-        <div class="secondary-copy"><p class="feature-kicker">开始绘制</p><h3>默认给出第一步，不让画布从空白开始</h3><p>旧方案需要先选择工具，绘制操作才会出现。新方案默认选中画笔，并增加直接触控绘制，让玩家先做出第一笔，再逐步理解更完整的功能。</p><p class="secondary-decision"><span>我的处理</span>画布在横屏中占据主要区域；颜色在需要时展开，避免常驻控件压缩创作空间。</p></div>
+        <div class="secondary-copy"><p class="feature-kicker">开始绘制</p><h3>默认给出第一步，不让画布从空白开始</h3><p>DIY 图案可以应用到服装、家具和地面。旧方案需要先选择工具，绘制操作才会出现。新方案默认选中画笔，并增加直接触控绘制，让玩家先做出第一笔，再逐步理解更完整的功能。</p><p class="secondary-decision"><span>设计输入</span>我获得了团队提供的部分 CE 测试结论，用于理解“进入后不知道如何开始”“工具难找”等问题；测试由其他成员开展，我没有参与测试执行。</p><p class="secondary-decision"><span>我的处理</span>画布在横屏中占据主要区域；颜色在需要时展开，避免常驻控件压缩创作空间。</p></div>
         <figure class="case-flow-card case-feature-evidence">${renderShot('DIY 绘图工具', '触控模式下的直接绘制', 'assets/cases/club-koala/interaction-touch.gif', 'case-evidence-shot')}<figcaption>触控模式下的直接绘制 · 点击放大查看</figcaption></figure>
         ${renderDetails('查看原型中的输入与工具交互', renderGallery('DIY 绘图工具', [['触控模式：直接绘制', 'assets/cases/club-koala/interaction-touch.gif'], ['光标模式：移动与填色', 'assets/cases/club-koala/interaction-cursor.gif'], ['工具模式：常用功能组织', 'assets/cases/club-koala/interaction-tools.gif']]))}
       </article>
@@ -232,9 +229,8 @@ const renderKoalaCase = () => `<section class="feature-case koala-case">
         <figure class="case-flow-card case-feature-evidence"><video controls playsinline preload="metadata" poster="assets/cases/club-koala/diy-phone-poster.jpg" aria-label="DIY 绘图工具手机操作演示"><source src="assets/cases/club-koala/diy-phone-demo.mp4" type="video/mp4"></video><figcaption>手机操作演示 · 约 14 秒 · 交互原型</figcaption></figure>
       </article>
     </div>
-    <section class="case-closing" aria-label="案例说明"><p>以上展示的是我在项目后期完成的优化方案与原型证据，重点呈现具体问题、设计判断和交互细节。</p></section>
-  </section>
-</section>`;
+    <section class="case-closing" aria-label="案例说明"><p>以上是我在项目后期完成的优化方案与原型证据，重点呈现具体问题、设计判断与交互证据。</p></section>
+  </section>`;
 const featureCase = item.feature ? renderFeatureCase(item.feature) : '';
 const koalaCase = item.koalaCase ? renderKoalaCase() : '';
 
