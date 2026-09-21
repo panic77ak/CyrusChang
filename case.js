@@ -220,12 +220,12 @@ const renderKoalaCase = () => `<section class="feature-case koala-case">
     <div class="case-secondary-list">
       <article>
         <div class="secondary-copy"><p class="feature-kicker">开始绘制</p><h3>默认给出第一步，不让画布从空白开始</h3><p>旧方案需要先选择工具，绘制操作才会出现。新方案默认选中画笔，并增加直接触控绘制，让玩家先做出第一笔，再逐步理解更完整的功能。</p><p class="secondary-decision"><span>我的处理</span>画布在横屏中占据主要区域；颜色在需要时展开，避免常驻控件压缩创作空间。</p></div>
-        <figure class="case-flow-card case-feature-evidence">${renderShot('DIY 绘图工具', '触控开始与颜色选择', 'assets/cases/club-koala/demo-entry.jpg', 'case-evidence-shot')}<figcaption>触控开始与颜色选择 · 点击放大查看</figcaption></figure>
-        ${renderDetails('查看原型中的画布与颜色变化', renderGallery('DIY 绘图工具', [['进入绘图画布', 'assets/cases/club-koala/demo-entry.jpg'], ['展开色板', 'assets/cases/club-koala/demo-colors.jpg'], ['选色后继续绘制', 'assets/cases/club-koala/demo-canvas.jpg']]))}
+        <figure class="case-flow-card case-feature-evidence">${renderShot('DIY 绘图工具', '触控模式下的直接绘制', 'assets/cases/club-koala/interaction-touch.gif', 'case-evidence-shot')}<figcaption>触控模式下的直接绘制 · 点击放大查看</figcaption></figure>
+        ${renderDetails('查看原型中的输入与工具交互', renderGallery('DIY 绘图工具', [['触控模式：直接绘制', 'assets/cases/club-koala/interaction-touch.gif'], ['光标模式：移动与填色', 'assets/cases/club-koala/interaction-cursor.gif'], ['工具模式：常用功能组织', 'assets/cases/club-koala/interaction-tools.gif']]))}
       </article>
       <article>
         <div class="secondary-copy"><p class="feature-kicker">绘画方式</p><h3>两种输入方式，共用一套创作任务</h3><p>触控模式下，单指可以点击或滑动绘制；光标模式下，单指移动光标，再通过填色按钮绘制，也可以长按按钮配合滑动连续绘制。</p><p class="secondary-decision"><span>设计判断</span>保留点触方式给偏轻度的玩家，同时提供更连续的触控方式，让想快速画的玩家不必被单格操作限制。</p></div>
-        <figure class="case-flow-card case-feature-evidence">${renderShot('DIY 绘图工具', '双模式与工具面板', 'assets/cases/club-koala/demo-mode.jpg', 'case-evidence-shot')}<figcaption>双模式与工具面板 · 点击放大查看</figcaption></figure>
+        <figure class="case-flow-card case-feature-evidence">${renderShot('DIY 绘图工具', '光标模式下的移动与填色', 'assets/cases/club-koala/interaction-cursor.gif', 'case-evidence-shot')}<figcaption>光标模式下的移动与填色 · 点击放大查看</figcaption></figure>
       </article>
       <article class="case-brief">
         <div class="secondary-copy"><p class="feature-kicker">编辑中的安全感</p><h3>让不同操作有清楚的边界和回退</h3><p>我补齐了缩放、画布移动、镜像、撤销与重做，以及切换模式、保存、发布和退出的流程。画布移动完成后作为一次操作回退；颜色切换时展示作品全貌并暂停绘制，减少误操作。</p><p class="secondary-decision"><span>交付状态</span>核心交互已在 Figma 原型中还原，并录制了手机操作演示。后因项目解散，方案未正式落地，因此不以效率、评分或完成率描述成果。</p></div>
