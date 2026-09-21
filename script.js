@@ -280,8 +280,9 @@ const previews = {
 };
 
 const previewLinks = document.querySelectorAll('.home .pill, .home .text-link');
+const supportsHoverPreview = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-if (previewLinks.length) {
+if (previewLinks.length && supportsHoverPreview) {
   const preview = document.createElement('aside');
   preview.className = 'link-preview';
   preview.id = 'link-preview';
