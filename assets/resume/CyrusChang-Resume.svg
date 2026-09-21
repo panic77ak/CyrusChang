@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1080" height="3600" viewBox="0 0 1080 3600" xmlns="http://www.w3.org/2000/svg">
+  <title>常宸—体验设计师简历</title>
+  <desc>以大留白和清晰层级设计的 1080 像素宽纯文字竖版简历。</desc>
+  <style>
+    .sans { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif; }
+    .ink { fill: #141414; }
+    .muted { fill: #8A8A8A; }
+    .faint { fill: #B0B0B0; }
+    .name { font-size: 52px; font-weight: 700; letter-spacing: -1.8px; }
+    .role { font-size: 23px; font-weight: 500; letter-spacing: 0.2px; }
+    .intro { font-size: 20px; font-weight: 400; letter-spacing: 0.2px; }
+    .body { font-size: 19px; font-weight: 400; letter-spacing: 0.1px; }
+    .kicker { font-size: 15px; font-weight: 600; letter-spacing: 2.4px; }
+    .company { font-size: 29px; font-weight: 700; letter-spacing: -0.7px; }
+    .position { font-size: 18px; font-weight: 600; }
+    .project { font-size: 17px; font-weight: 400; }
+    .tag { font-size: 16px; font-weight: 650; fill: #FFFFFF; }
+  </style>
+
+  <rect width="1080" height="3600" fill="#FFFFFF"/>
+
+  <!-- Identity -->
+  <circle cx="111" cy="203" r="11" fill="none" stroke="#141414" stroke-width="1.4"/>
+  <text x="111" y="208" text-anchor="middle" class="sans ink" font-size="14" font-weight="600">C</text>
+  <text x="140" y="210" class="sans ink role">体验设计师</text>
+  <text x="100" y="266" class="sans muted kicker">COMPLEX-SYSTEM UX　·　GAME INTERACTION　·　AI PRACTICE</text>
+
+  <text x="100" y="410" class="sans ink intro">你好，我是常宸。</text>
+  <text x="100" y="468" class="sans ink intro">
+    <tspan x="100">目前负责《王者万象棋》的交互设计，主要接的是局外系统里那些规则多、状态多、</tspan>
+    <tspan x="100" dy="35">容易说不清楚的部分，比如交易、百科、卡牌、大厅、成长反馈和活动玩法。</tspan>
+  </text>
+  <text x="100" y="594" class="sans ink intro">
+    <tspan x="100">我比较喜欢把规则多、状态多、协作也容易打结的东西理顺。玩家要先看到什么，</tspan>
+    <tspan x="100" dy="35">什么时候该知道规则，哪里需要反馈，哪里不能误导，策划、UI、开发之间又该怎么</tspan>
+    <tspan x="100" dy="35">把同一件事说清楚，是我平时做得最多的事。</tspan>
+  </text>
+  <text x="100" y="758" class="sans muted intro">
+    <tspan x="100">这几年我也在把 AI 放进自己的工作方式里：用它整理知识、拆需求、辅助写文档，</tspan>
+    <tspan x="100" dy="35">也用 vibe coding 做过可运行的小工具原型。</tspan>
+  </text>
+
+  <!-- Work -->
+  <text x="100" y="974" class="sans muted kicker">01　工作经历 / EXPERIENCE</text>
+
+  <text x="100" y="1068" class="sans ink company">腾讯游戏（腾娱）</text>
+  <text x="980" y="1066" text-anchor="end" class="sans ink position">UX / Interaction Designer</text>
+  <text x="980" y="1098" text-anchor="end" class="sans muted project">2025.10 – 至今</text>
+  <text x="100" y="1120" class="sans muted project">《王者万象棋》　·　王者荣耀 IP 自走棋项目</text>
+  <text x="100" y="1202" class="sans ink body">
+    <tspan x="100">这里很多需求不是“画一个页面”就能解决的，更多时候要把规则、入口、状态、反馈</tspan>
+    <tspan x="100" dy="34">和落地边界一起说清楚。</tspan>
+  </text>
+  <text x="100" y="1330" class="sans ink body">
+    <tspan x="100">入组后主要补位局外系统交互链路，把系统策划、UI 和开发之间的需求配合打通。</tspan>
+    <tspan x="100" dy="34">团队原本更习惯承接运营需求和局内需求，我更多接住的是规则表达、页面组织、</tspan>
+    <tspan x="100" dy="34">状态反馈和 UX 验收。</tspan>
+  </text>
+  <text x="100" y="1492" class="sans ink body">
+    <tspan x="100">2026 年完成 100+ 项需求交付，覆盖交互设计、交互验收、版本跑查和缺陷跟进。</tspan>
+    <tspan x="100" dy="34">结果不是某个单点页面变漂亮，而是局外系统的交互链路开始更稳定，设计也能更早</tspan>
+    <tspan x="100" dy="34">参与规则和方案判断。</tspan>
+  </text>
+  <text x="100" y="1654" class="sans ink body">
+    <tspan x="100">参与局外系统的多模块交互设计，重点处理交易、百科、卡牌、大厅、成长反馈与</tspan>
+    <tspan x="100" dy="34">活动玩法里的规则表达、状态反馈和入口组织。棋手应援是其中比较典型的复杂案例，</tspan>
+    <tspan x="100" dy="34">涉及组合投注模型、参与条件、结果反馈和法务风险表达。</tspan>
+  </text>
+
+  <text x="100" y="1908" class="sans ink company">昆仑万维</text>
+  <text x="980" y="1906" text-anchor="end" class="sans ink position">UE Designer</text>
+  <text x="980" y="1938" text-anchor="end" class="sans muted project">2021.11 – 2025.02</text>
+  <text x="100" y="1960" class="sans muted project">海外模拟经营与 SLG 项目</text>
+  <text x="100" y="2042" class="sans ink body">
+    <tspan x="100">在模拟经营项目《Club Koala》中推进 UX 框架重构，整理设计语言、组件库、</tspan>
+    <tspan x="100" dy="34">文案指南、适配规范和走查机制，减少多端、多语言、多模块带来的体验不一致。</tspan>
+  </text>
+  <text x="100" y="2170" class="sans ink body">
+    <tspan x="100">重构 DIY 绘制系统的信息架构，把高频 / 低频功能重新分层，并设计触控与光标</tspan>
+    <tspan x="100" dy="34">双模式、双指缩放、撤销回退和新手引导。</tspan>
+  </text>
+  <text x="100" y="2298" class="sans ink body">
+    <tspan x="100">在《Dragon City Rises》SLG 项目中参与自立项到早期迭代，协助搭建信息架构</tspan>
+    <tspan x="100" dy="34">和基础体验方案。</tspan>
+  </text>
+
+  <text x="100" y="2520" class="sans ink company">云派互联</text>
+  <text x="980" y="2518" text-anchor="end" class="sans ink position">UE Designer</text>
+  <text x="980" y="2550" text-anchor="end" class="sans muted project">2020.11 – 2021.11</text>
+  <text x="100" y="2572" class="sans muted project">欧美休闲卡牌手游</text>
+  <text x="100" y="2654" class="sans ink body">这是我转入游戏行业的关键节点，也是在游戏项目中开始独立负责体验设计的阶段。</text>
+  <text x="100" y="2750" class="sans ink body">
+    <tspan x="100">在《Tripeaks Solitaire Garden》中负责高保真交互设计、界面流程整理和交付说明，</tspan>
+    <tspan x="100" dy="34">配合 UI、特效和前端推进方案落地。</tspan>
+  </text>
+
+  <text x="100" y="2968" class="sans ink company">上海微盟</text>
+  <text x="980" y="2966" text-anchor="end" class="sans ink position">UI Designer</text>
+  <text x="980" y="2998" text-anchor="end" class="sans muted project">2018.11 – 2020.04</text>
+
+  <!-- Closing -->
+  <text x="100" y="3158" class="sans muted kicker">02　教育与联系 / EDUCATION &amp; CONTACT</text>
+  <text x="100" y="3234" class="sans ink position">辽宁财贸学院　·　艺术设计学　·　2013 – 2017</text>
+  <text x="100" y="3296" class="sans muted project">one-chang.com　·　github.com/panic77ak　·　WeChat dc777755　·　changchen7775@gmail.com</text>
+  <text x="100" y="3332" class="sans muted project">公众号：一杯 ice　·　人人都是产品经理：CyrusChang　·　Tel：18406257775</text>
+  <text x="100" y="3414" class="sans ink role">体验设计师，成分复杂。浅问深答，不妨聊聊。</text>
+</svg>
