@@ -133,13 +133,14 @@ const cases = {
   'dragon-city-rises': {
     title: 'Dragon City Rises', meta: 'SLG · 早期项目',
     icon: 'assets/dragon-city-rises-icon.png',
-    intro: '一个从立项阶段开始参与的海外 SLG 项目。工作重点是把早期功能设想整理成可继续迭代的信息架构与基础体验方案。',
-    facts: [['角色','UE Designer'],['阶段','自立项到早期迭代'],['重点','信息架构与基础体验方案']],
+    intro: '一个从立项阶段开始参与的海外 SLG 项目。我负责把不断补充的功能设想整理成可继续迭代的信息架构，并落实到主城与系统入口的基础体验方案。',
+    facts: [],
+    dragonCase: true,
     sections: [
       ['问题','早期项目的系统边界和内容量仍在变化，需要先建立能够承接后续增长的基本结构。'],
       ['我的参与','协助整理核心功能之间的关系、入口与页面层级，把抽象的系统描述转成可讨论、可迭代的体验框架。'],
       ['案例边界','当前只展示能够确认的项目阶段与职责；更具体的内部设计内容暂不公开。']
-    ], source: ['项目视频','https://www.youtube.com/watch?v=P9Kov4wqrss']
+    ], source: ['项目视频','https://www.youtube.com/watch?v=P9Kov4wqrss'], sourcePlacement: 'header'
   }
 };
 const key = new URLSearchParams(location.search).get('project') || 'wanxiangqi';
@@ -231,8 +232,24 @@ const renderKoalaCase = () => `<section class="case-secondary case-systems">
     </div>
     <section class="case-closing" aria-label="案例说明"><p>以上是我在项目后期完成的优化方案与原型证据，重点呈现具体问题、设计判断与交互证据。</p></section>
   </section>`;
+const renderDragonCase = () => `<section class="case-secondary case-systems">
+    <header><p class="feature-kicker">项目案例</p><h2>从不断变化的功能设想，建立可继续生长的结构</h2></header>
+    <div class="case-secondary-list">
+      <article>
+        <div class="secondary-copy"><p class="feature-kicker">信息架构</p><h3>先为主城和系统入口建立共同的层级</h3><p>项目早期的功能范围仍在扩展。围绕主页，我梳理个人信息、骑军、活动礼包、系统功能、玩法功能、日常、战斗队列与建造队列等主要模块，并把一级入口与后续子功能整理为可继续补充的关系。</p><p class="secondary-decision"><span>我的处理</span>先明确主城之外需要独立承载的系统，再把每个模块的常用动作和扩展节点放入对应层级，避免后续新增功能只能继续堆叠在主页。</p></div>
+        <figure class="case-flow-card case-feature-evidence">${renderShot('Dragon City Rises', '系统层级与主城入口总览', 'assets/cases/dragon-city-rises/architecture-overview.png', 'case-evidence-shot')}<figcaption>系统层级与主城入口总览 · 点击放大查看</figcaption></figure>
+        ${renderDetails('查看系统层级图', renderGallery('Dragon City Rises', [['主要系统层级', 'assets/cases/dragon-city-rises/system-map.png']]))}
+      </article>
+      <article>
+        <div class="secondary-copy"><p class="feature-kicker">主城入口</p><h3>让场景、任务和高频操作各有稳定位置</h3><p>主城同时承担场景展示、任务推进、活动提示和多个高频系统入口。我将玩家与资源信息放在顶部，任务放在左侧，活动信息放在右侧，底部承接阵营、角色、召唤、背包与小游戏等系统入口。</p><p class="secondary-decision"><span>设计判断</span>让动态内容和固定系统分开承载：任务与活动可以随版本变化调整，底部入口保持稳定，玩家能在主城中持续找到常用操作。</p></div>
+        <figure class="case-flow-card case-feature-evidence">${renderShot('Dragon City Rises', '主城中任务、活动与系统入口的落位', 'assets/cases/dragon-city-rises/city-layout.png', 'case-evidence-shot')}<figcaption>主城中任务、活动与系统入口的落位 · 点击放大查看</figcaption></figure>
+      </article>
+    </div>
+    <section class="case-closing" aria-label="案例说明"><p>以上展示的是我在项目早期参与的信息架构与主城基础体验方案，重点呈现我直接负责的结构梳理和界面落位。</p></section>
+  </section>`;
 const featureCase = item.feature ? renderFeatureCase(item.feature) : '';
 const koalaCase = item.koalaCase ? renderKoalaCase() : '';
+const dragonCase = item.dragonCase ? renderDragonCase() : '';
 
 const caseFacts = item.facts.length
   ? `<dl class="case-facts">${item.facts.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`
@@ -243,9 +260,9 @@ const headerSource = item.source && item.sourcePlacement === 'header'
 const sourceLink = item.source && item.sourcePlacement !== 'header'
   ? `<a class="source-link" href="${item.source[1]}" target="_blank" rel="noopener noreferrer">${item.source[0]} ↗</a>`
   : '';
-document.querySelector('#case-content').innerHTML = `<header class="case-header${item.icon ? ' has-icon' : ''}">${item.icon ? `<img class="case-project-icon" src="${item.icon}" alt="">` : ''}<div><h1>${item.title}</h1><p class="case-meta"><span>${item.meta}</span>${headerSource}</p></div><p class="lead">${item.intro}</p></header>${caseFacts}${featureCase}${koalaCase}${item.koalaCase ? '' : standardSections}${sourceLink}`;
+document.querySelector('#case-content').innerHTML = `<header class="case-header${item.icon ? ' has-icon' : ''}">${item.icon ? `<img class="case-project-icon" src="${item.icon}" alt="">` : ''}<div><h1>${item.title}</h1><p class="case-meta"><span>${item.meta}</span>${headerSource}</p></div><p class="lead">${item.intro}</p></header>${caseFacts}${featureCase}${koalaCase}${dragonCase}${item.koalaCase || item.dragonCase ? '' : standardSections}${sourceLink}`;
 
-if (item.feature || item.koalaCase) {
+if (item.feature || item.koalaCase || item.dragonCase) {
   const dialog = document.createElement('dialog');
   dialog.className = 'case-lightbox';
   dialog.innerHTML = '<button type="button" class="lightbox-close" aria-label="关闭预览">关闭</button><img alt="">';
