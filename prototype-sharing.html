@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="常宸与 AI 协作制作可交互 HTML 原型的方法。">
+    <title>原型制作分享 · CyrusChang</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page prose-page">
+      <a class="back" href="demos.html">← <span>设计实践</span></a>
+      <header>
+        <p class="eyebrow">原型制作分享 · 2026.09</p>
+        <h1>把静态设计稿，做成能走一遍的体验。</h1>
+        <p class="lead">我用 AI 协作制作高保真 HTML Demo，但目标不是把整页逐像素复刻，而是优先还原会被点击、会变化、会影响演示路径的部分。</p>
+      </header>
+      <section>
+        <h2>先划范围，再开始还原</h2>
+        <p>背景、装饰和不会被点击的区域可以用图片、视频或占位处理。先确定哪些操作需要演示、哪些状态会改变、哪些路径必须能走通，才能把时间花在真正影响体验判断的地方。</p>
+      </section>
+      <section>
+        <h2>什么时候值得做成 HTML Demo</h2>
+        <p>当一个界面有多种状态切换，或需要演示拖拽、长按、排序、弹窗、禁用和连续反馈时，静态稿很容易让人误解“点了以后会发生什么”。这时做成可以操作的原型，会比多张截图更直接。</p>
+      </section>
+      <section>
+        <h2>我会先写清楚交互关系</h2>
+        <p>给 AI 的输入不该只是“还原这个页面”。我会明确：点击哪个元素，进入哪个页面或状态；当前页面是否保留；这是切页、弹窗还是状态变化；以及哪些区域不需要做成真实功能。范围越明确，原型越容易保持正确。</p>
+      </section>
+      <section>
+        <h2>从主流程开始，再补关键分支</h2>
+        <p>先让主要操作能走通，再补会影响理解的边界状态，例如未解锁、达到上限、取消、返回和保存。效果偏离时，直接回到可用版本，再用更具体的反馈修正一个局部，而不是在错误的结果上继续叠加修改。</p>
+      </section>
+      <section>
+        <h2>两个可操作示例</h2>
+        <p><a class="source-link" href="demos.html#interactive-prototypes">玩法大厅与菜单自定义原型 →</a></p>
+      </section>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>
