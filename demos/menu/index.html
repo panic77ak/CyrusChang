@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>主菜单自定义 · 画板编辑态（86-75443）</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="viewport">
+      <div class="artboard" id="artboard">
+        <!-- 背景 29.png（2163×1081 @ left:-2） -->
+        <img class="board-bg" src="assets/CodeBuddyAssets/86_75443/29.png" alt="" />
+
+        <!-- ===== 菜单卡片列表（195×240，4 列网格）——条目与行分割线由 app.js 渲染 ===== -->
+        <ul class="menu-grid is-editing" aria-label="菜单选项列表"></ul>
+
+        <!-- ===== 顶部导航 ===== -->
+        <div class="top-nav">
+          <button class="nav-home" type="button" aria-label="主菜单">
+            <img class="nav-home-icon" src="assets/CodeBuddyAssets/86_75443/21.svg" alt="" />
+          </button>
+
+          <img class="nav-sep" src="assets/CodeBuddyAssets/86_75443/22.svg" alt="" />
+
+          <button class="nav-btn" type="button" draggable="false" data-id="formation" data-label="阵容" aria-label="阵容" style="left: 178px">
+            <span class="nav-btn-bg" aria-hidden="true"></span>
+            <span class="nav-btn-icon" aria-hidden="true"><img src="assets/CodeBuddyAssets/86_75443/23.svg" alt="" style="left: 2px; top: -0.37px" /></span>
+            <span class="nav-btn-text">阵容</span>
+          </button>
+
+          <button class="nav-btn" type="button" draggable="false" data-id="bag" data-label="背包" aria-label="背包" style="left: 385px">
+            <span class="nav-btn-bg" aria-hidden="true"></span>
+            <span class="nav-btn-icon" aria-hidden="true"><img src="assets/CodeBuddyAssets/86_75443/36.svg" alt="" style="left: 4.5px; top: 1.5px" /></span>
+            <span class="nav-btn-text">背包</span>
+          </button>
+
+          <button class="nav-btn" type="button" draggable="false" data-id="event" data-label="活动" aria-label="活动" style="left: 592px">
+            <span class="nav-btn-bg" aria-hidden="true"></span>
+            <span class="nav-btn-icon" aria-hidden="true"><img src="assets/CodeBuddyAssets/86_75443/24.svg" alt="" style="left: 4px; top: 0" /></span>
+            <span class="nav-btn-text">活动</span>
+          </button>
+
+          <button class="nav-btn" type="button" draggable="false" data-id="mall" data-label="商城" aria-label="商城" style="left: 799px">
+            <span class="nav-btn-bg" aria-hidden="true"></span>
+            <span class="nav-btn-icon" aria-hidden="true"><img src="assets/CodeBuddyAssets/86_75443/37.svg" alt="" style="left: -4.5px; top: 1.94px" /></span>
+            <span class="nav-btn-text">商城</span>
+          </button>
+        </div>
+
+        <!-- ===== 底部：恢复默认 187×40 @(43,1036)（Frame 1933544370）
+             画板固定元素，不属于列表，不随列表滚动 ===== -->
+        <button class="reset-btn" id="reset-btn" type="button" aria-label="恢复默认">
+          <img class="reset-icon" src="assets/CodeBuddyAssets/103_88873/1.svg" alt="" />
+          <span class="reset-text">恢复默认</span>
+        </button>
+
+        <!-- ===== 右下角操作：取消 / 保存（456×198 @(1279.5/1735.5, 897)） ===== -->
+        <button class="action-btn action-btn--cancel" id="cancel-btn" type="button" aria-label="取消" style="left: 1402.5px">
+          <span class="action-inner" aria-hidden="true">
+            <span class="action-plate">
+              <img src="assets/CodeBuddyAssets/103_88649/1.png" alt="" style="left: 0; width: 129.15px" />
+              <img src="assets/CodeBuddyAssets/103_88649/2.png" alt="" style="left: 129.15px; width: 27.75px" />
+              <img src="assets/CodeBuddyAssets/103_88649/3.png" alt="" style="left: 156.9px; width: 161.1px" />
+            </span>
+            <img class="action-label" src="assets/CodeBuddyAssets/103_88649/4.png" alt="" />
+          </span>
+          <span class="action-text">取消</span>
+        </button>
+
+        <button class="action-btn action-btn--save" id="save-btn" type="button" aria-label="保存" style="left: 1735.5px">
+          <span class="action-inner" aria-hidden="true">
+            <span class="action-plate">
+              <img src="assets/CodeBuddyAssets/103_88644/1.png" alt="" style="left: 0; width: 129.15px" />
+              <img src="assets/CodeBuddyAssets/103_88644/2.png" alt="" style="left: 129.15px; width: 27.75px" />
+              <img src="assets/CodeBuddyAssets/103_88644/3.png" alt="" style="left: 156.9px; width: 161.1px" />
+            </span>
+            <img class="action-label" src="assets/CodeBuddyAssets/103_88644/4.png" alt="" />
+          </span>
+          <span class="action-text">保存</span>
+        </button>
+
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+
+        <!-- 屏幕居中提示：顶栏位置达上限时使用（96-88163） -->
+        <div class="toast" id="toast" role="alert" aria-live="assertive">
+          <img class="toast-dot" src="assets/CodeBuddyAssets/96_88163/1.svg" alt="" />
+          <span class="toast-text">快捷入口达到上限</span>
+          <img class="toast-dot" src="assets/CodeBuddyAssets/96_88163/2.svg" alt="" />
+        </div>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

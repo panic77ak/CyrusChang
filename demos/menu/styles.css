@@ -1,0 +1,752 @@
+:root {
+  --artboard-width: 2160px;
+  --artboard-height: 1080px;
+  --font-family: "HYQiHei", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --surface-outline: rgba(226, 240, 255, 0.86);
+  --accent: #9dd8ff;
+  --shadow: rgba(5, 12, 30, 0.76);
+  /* Figma 画布采用 text-box-trim: trim-both / cap alphabetic，
+     即文字盒高度 = 大写高度（36px 字约 26px，33px 字为 24px）。
+     这里用等效 line-height 还原，避免文字整体下沉。 */
+  --cap-36: 26px;
+  --cap-33: 24px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #101726;
+  font-family: var(--font-family);
+}
+
+.viewport {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(93, 133, 189, 0.14), transparent 47%), #101726;
+}
+
+.artboard {
+  position: relative;
+  width: var(--artboard-width);
+  height: var(--artboard-height);
+  flex: 0 0 var(--artboard-width);
+  overflow: hidden;
+  zoom: var(--artboard-scale, 1);
+  background: #25344d;
+  box-shadow: 0 26px 80px var(--shadow);
+}
+
+button {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+}
+
+img { display: block; }
+
+/* 说明：所有 SVG 均按原始尺寸渲染（不设置 width/height），
+   因为导出画布含阴影/透明留白，缩放会导致图形被缩小且各图标比例不一致。 */
+
+/* ===== 背景 29.png（2163×1081 @ left:-2） ===== */
+.board-bg {
+  position: absolute;
+  left: -2px;
+  top: 0;
+  width: 2163px;
+  height: 1081px;
+  pointer-events: none;
+}
+
+/* ===== 行分割线 786×9：52,154 起，每行 +264（top 补偿 +18 见 app.js） ===== */
+.menu-divider {
+  position: absolute;
+  left: 49px;
+  width: 786px;
+  height: 9px;
+  pointer-events: none;
+}
+
+/* ===== 菜单卡片网格：自动排布 =====
+   容器 @(43, 154)（列表整体上移 40），padding-top 12 → 首行卡片落在 166；
+   每行 4 个 195×240 卡片，列间距 5、行间距 24，
+   与顶栏快捷入口去重后剩下的卡片按顺序自动填充，无需逐个写坐标。 */
+.menu-grid {
+  position: absolute;
+  /* 可视区外扩：卡片列仍在 43..838 / 首行 166 */
+  left: 3px;
+  top: 136px;
+  display: grid;
+  grid-template-columns: repeat(4, 195px);
+  grid-auto-rows: 240px;
+  column-gap: 5px;
+  row-gap: 24px;
+  /* 列表可拖动：内容超出画板时按住上下拖动翻动（滚轮同样可用）
+     高度 810、底部无内边距：padding-box 底 = 136+810 = 946（末行分割线），
+     overflow 裁剪到 padding-box → 第 4 行起完全不露出 */
+  height: 810px;
+  padding: 30px 40px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  cursor: grab;
+  /* 语义列表：去掉 ul 默认的项目符号与缩进 */
+  list-style: none;
+  margin: 0;
+}
+
+.menu-grid::-webkit-scrollbar { width: 0; height: 0; }
+
+.menu-grid.is-panning,
+.menu-grid.is-panning .menu-item { cursor: grabbing; }
+
+/* 卡片 195×240（本节点画布无旋转变换，保持静态） */
+.menu-item {
+  position: relative;
+  width: 195px;
+  height: 240px;
+  overflow: visible; /* 长按浮起时内容会放大出卡片边界 */
+  pointer-events: auto;
+  outline: none;
+  cursor: pointer;
+  user-select: none; /* 长按拖动时不选中文字 */
+  /* li 担任按钮：清掉默认盒模型差异 */
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* 无图标资源时的兜底：虚线框 + 序号（当前条目均有图标，暂未用到） */
+.filler-num {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 138px;
+  height: 138px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px dashed rgba(255, 255, 255, 0.45);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 64px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  line-height: 1;
+  text-shadow: 0 3px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 填充项文字较长，整卡宽度居中 */
+.menu-item.is-filler .card-text,
+.drag-origin.is-filler .card-text {
+  left: 0;
+  width: 195px;
+}
+
+/* 菜单空位：与卡片同尺寸（195×240），拖入即填入末位；拖动中才显示 */
+.menu-slot {
+  width: 195px;
+  height: 240px;
+  border: 2px dashed transparent;
+  border-radius: 12px;
+  pointer-events: auto;
+}
+
+.menu-grid.is-receiving .menu-slot {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ===== 拖拽判定反馈 ===== */
+
+/* 白框与可见底板一致；只放大图标内容，热区边界不随高亮改变。 */
+.menu-item.is-swap-target .card-bg,
+.nav-btn.is-swap-target .nav-btn-bg {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.menu-item.is-swap-target .card-icon,
+.nav-btn.is-swap-target .nav-btn-icon {
+  transform: scale(1.06);
+  filter: drop-shadow(0 8px 10px rgba(2, 6, 18, 0.4));
+}
+
+.menu-insert-slot {
+  width: 195px;
+  height: 240px;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.nav-insert-slot {
+  position: absolute;
+  top: 30px;
+  width: 200px;
+  height: 60px;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.drag-origin {
+  position: absolute;
+  opacity: 0.35;
+  background: transparent;
+  pointer-events: none;
+}
+
+.drag-origin * {
+  pointer-events: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+.drag-origin .card-inner { transform: none; outline: none; }
+
+/* ===== 长按编辑模式：图标轻微晃动（iOS 桌面效果） =====
+   卡片用 left/top 定位，transform 不影响布局；
+   交替方向 + 不同周期/延迟，让 9 个图标不同步。 */
+@keyframes jiggle-a {
+  0% { transform: rotate(-1.1deg) translate3d(-0.5px, 0.5px, 0) scale(1.03); }
+  100% { transform: rotate(1.1deg) translate3d(0.5px, -0.5px, 0) scale(1.03); }
+}
+
+@keyframes jiggle-b {
+  0% { transform: rotate(0.9deg) translate3d(0.5px, -0.4px, 0) scale(1.03); }
+  100% { transform: rotate(-0.9deg) translate3d(-0.5px, 0.4px, 0) scale(1.03); }
+}
+
+.menu-grid.is-editing .menu-item {
+  animation: jiggle-a 0.42s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.menu-grid.is-editing .menu-item:nth-child(2n) {
+  animation-name: jiggle-b;
+  animation-duration: 0.5s;
+}
+
+.menu-grid.is-editing .menu-item:nth-child(3n) {
+  animation-duration: 0.36s;
+  animation-delay: -0.13s;
+}
+
+.menu-grid.is-editing .menu-item:nth-child(4n) {
+  animation-delay: -0.2s;
+}
+
+/* 内容层：长按浮起的放大/投影作用在这一层，卡片本体的晃动动画不受影响 */
+.card-inner {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: transform 170ms cubic-bezier(0.2, 0.9, 0.3, 1.25), filter 170ms ease;
+}
+
+/* 按下：先缩小（放在 .is-lifted 之前，长按后由 JS 摘掉再放大） */
+.menu-item.is-pressed .card-inner { transform: scale(0.95); }
+
+.menu-item.is-lifted { z-index: 6; }
+
+.menu-item.is-lifted .card-inner {
+  transform: scale(1.05) translateY(-6px);
+  filter: drop-shadow(0 14px 18px rgba(2, 6, 18, 0.5));
+}
+
+/* 175×220 半透明底板 @(10.50,10) */
+.card-bg {
+  position: absolute;
+  width: 175px;
+  height: 220px;
+  left: 10.5px;
+  top: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* 138×138 图标区 @(29,23) */
+.card-icon {
+  position: absolute;
+  width: 138px;
+  height: 138px;
+  left: 29px;
+  top: 23px;
+  pointer-events: none;
+}
+
+/* 图标：图形落在设计框内（画布为图形 + 26px 阴影留白，故偏移 -26） */
+.card-icon img { position: absolute; }
+
+.ic-mail { left: 8.5px; top: 16.5px; }        /* 69×53 @(34.50,42.50) */
+.ic-wish { left: 11px; top: 11px; }           /* 64×64 @(37,37) */
+.ic-season { left: 10px; top: 5px; }          /* 66×76 @(36,31) */
+.ic-team { left: 12.02px; top: 14px; }        /* 61.96×58 @(38.02,40) */
+.ic-friends { left: 10.5px; top: 14.5px; }    /* 65×57 @(36.50,40.50) */
+.ic-bag { left: 16px; top: 11px; }            /* 54×64 @(42,37) */
+.ic-formation { left: 13px; top: 9px; }       /* 60×67 @(39,35) */
+.ic-event { left: 42px; top: 34px; }          /* 54×70 @(42,34)，该图标画布无留白 */
+.ic-mall { left: 2.65px; top: 12px; }         /* 80.71×61 @(28.65,38) */
+
+/* 文字 @(61.50,137) */
+.card-text {
+  position: absolute;
+  left: 61.5px;
+  top: 137px;
+  color: #fff;
+  font-size: 36px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  line-height: var(--cap-36);
+  text-align: center;
+  text-shadow: 0 3px 3px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+/* ===== 顶部导航 ===== */
+.top-nav { position: absolute; inset: 0; pointer-events: none; }
+
+/* 菜单图标 45×36 @(45,42) opacity .5，图形 36×25 @(45,47) */
+.nav-home {
+  position: absolute;
+  left: 45px;
+  top: 42px;
+  width: 45px;
+  height: 36px;
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+.nav-home-icon { position: absolute; left: 0; top: 5px; }
+
+/* 分隔线 @(122,42) */
+.nav-sep { position: absolute; left: 122px; top: 42px; pointer-events: none; }
+
+/* 导航按钮 117×36 @(178/385/592/799, 42) */
+.nav-btn {
+  position: absolute;
+  top: 42px;
+  width: 117px;
+  height: 36px;
+  pointer-events: auto;
+  outline: none;
+  user-select: none;
+  transition: transform 170ms cubic-bezier(0.2, 0.9, 0.3, 1.25), filter 170ms ease, opacity 120ms ease;
+}
+
+/* 按下：先缩小 */
+.nav-btn.is-pressed { transform: scale(0.95); }
+
+/* 长按浮起：轻微放大 + 上浮 + 投影 */
+.nav-btn.is-lifted {
+  z-index: 6;
+  transform: scale(1.08) translateY(-3px);
+  filter: drop-shadow(0 10px 14px rgba(2, 6, 18, 0.5));
+}
+
+/* 命中/选中区域 = Rectangle 203879：200×60 @(-41,-12)，与选中底板完全重合；
+   槽位步进 207 > 200，相邻两项之间仍留 7px 间隙，不会互相遮挡 */
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  left: -41px;
+  top: -12px;
+  width: 200px;
+  height: 60px;
+  border-radius: 8px;
+}
+
+/* 选中底板 200×60 @(-41,-12) */
+.nav-btn-bg {
+  position: absolute;
+  width: 200px;
+  height: 60px;
+  left: -41px;
+  top: -12px;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* 图标 36×36 @(0,0) */
+.nav-btn-icon { position: absolute; left: 0; top: 0; width: 36px; height: 36px; }
+.nav-btn-icon img { position: absolute; }
+
+/* 文字 @(45,5) → 绝对 (223/430/637/844, 47) */
+.nav-btn-text {
+  position: absolute;
+  left: 45px;
+  top: 5px;
+  opacity: 0.9;
+  color: #fff;
+  font-size: 36px;
+  font-family: var(--font-family);
+  font-weight: 900;
+  line-height: var(--cap-36);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+/* 顶栏填充项：序号代替图标，字号收窄以免溢出 */
+.nav-num {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 22px;
+  font-family: var(--font-family);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.nav-btn.is-filler .nav-btn-text,
+.drag-origin.is-filler .nav-btn-text {
+  left: 42px;
+  top: 8px;
+  font-size: 26px;
+}
+
+/* hover / 键盘聚焦：描边落在 200×60 的选区上 */
+.nav-btn:hover::before,
+.nav-btn:focus-visible::before { outline: 2px solid var(--surface-outline); outline-offset: -2px; }
+
+/* 顶栏空槽位：与选中底板同尺寸（200×60），拖入即可填入；
+   常显黑色占位底板（与 .nav-btn-bg 一致），顶栏为空时即显示一排黑色占位块 */
+.nav-slot {
+  position: absolute;
+  top: 30px;
+  width: 200px;
+  height: 60px;
+  border-radius: 8px;
+  border: 2px dashed transparent;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+}
+
+/* 拖动中才提示可放置的空位 */
+.top-nav.is-receiving .nav-slot {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 顶栏拖动排序 */
+.nav-btn.is-dragging { opacity: 0.55; }
+
+/* 顶栏快捷入口与菜单一致的晃动；拖动或落位时停下，避免与浮起缩放冲突 */
+.artboard .nav-btn {
+  animation: jiggle-a 0.42s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.artboard .nav-btn:nth-child(2n) {
+  animation-name: jiggle-b;
+  animation-duration: 0.5s;
+}
+
+.artboard .nav-btn:nth-child(3n) {
+  animation-duration: 0.36s;
+  animation-delay: -0.13s;
+}
+
+.artboard .nav-btn:nth-child(4n) {
+  animation-delay: -0.2s;
+}
+
+.artboard.is-pointer-gesture .nav-btn,
+.artboard.is-settling .nav-btn {
+  animation: none;
+  will-change: auto;
+}
+
+/* ===== 右下角操作按钮：取消 / 保存（456×198 @(1279.5 / 1735.5, 897)） =====
+   与棋手切换同尺寸同结构，仅换「黑价签按钮 / 白价签按钮」两套资源与文字 */
+.action-btn {
+  position: absolute;
+  top: 897px;
+  width: 456px;
+  height: 198px;
+  pointer-events: auto;
+  outline: none;
+}
+
+/* 318×96 @(69,59.50) */
+.action-inner {
+  position: absolute;
+  left: 69px;
+  top: 59.5px;
+  width: 318px;
+  height: 96px;
+  pointer-events: none;
+  transition: transform 120ms ease;
+}
+
+/* 318×75 底板 @(0,21) */
+.action-plate {
+  position: absolute;
+  left: 0;
+  top: 21px;
+  width: 318px;
+  height: 75px;
+}
+
+.action-plate img { position: absolute; top: 0; height: 75px; }
+
+/* 302×78 标签 @(7.5,0) */
+.action-label { position: absolute; left: 7.5px; top: 0; width: 302px; height: 78px; }
+
+/* 文字 66×24 @(195,87)：在 303×54 文字区 @(76.5,72) 内水平居中 */
+.action-text {
+  position: absolute;
+  left: 195px;
+  top: 87px;
+  width: 66px;
+  height: 24px;
+  font-family: var(--font-family);
+  font-size: 33px;
+  font-weight: 900;
+  line-height: var(--cap-33);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* 保存 = 白色按钮 + 深色字；取消 = 黑色按钮 + 浅色字 */
+.action-btn--save .action-plate {
+  background: url("./assets/CodeBuddyAssets/103_88644/5.png") left top / 100% 100% no-repeat;
+}
+
+.action-btn--save .action-text {
+  color: #2e2d33;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.action-btn--cancel .action-plate {
+  background: url("./assets/CodeBuddyAssets/103_88649/5.png") left top / 100% 100% no-repeat;
+}
+
+.action-btn--cancel .action-text {
+  color: #c7cdde;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.action-btn:hover .action-inner,
+.action-btn:focus-visible .action-inner { outline: 2px solid rgba(255, 255, 255, 0.92); outline-offset: -2px; }
+
+.action-btn:active .action-inner { transform: scale(0.96); }
+
+/* ===== 恢复默认 187×40 @(346,993)：效果图里居中于列表下方
+   画在画板上、不在 .menu-grid 内，因此不随列表滚动 */
+.reset-btn {
+  position: absolute;
+  left: 346px;
+  top: 993px;
+  width: 187px;
+  height: 40px;
+  pointer-events: auto;
+  outline: none;
+  transition: transform 120ms ease;
+}
+
+/* 图标 38×42 @(0,0)：比容器高 2px，上移 1px 视觉居中 */
+.reset-icon { position: absolute; left: 0; top: -1px; }
+
+/* 文字 132×40 @(55,0)：33px 字（行高 24）在 40 高容器内居中 → top 8 */
+.reset-text {
+  position: absolute;
+  left: 55px;
+  top: 8px;
+  width: 132px;
+  height: 24px;
+  color: #fff;
+  font-family: var(--font-family);
+  font-size: 33px;
+  font-weight: 500;
+  line-height: var(--cap-33);
+  text-align: center;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.reset-btn:hover,
+.reset-btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.92); outline-offset: -2px; }
+
+.reset-btn:active { transform: scale(0.96); }
+
+/* ===== 交互态 ===== */
+.menu-item:hover .card-inner,
+.menu-item:focus-visible .card-inner { outline: 2px solid var(--surface-outline); outline-offset: -2px; }
+
+.menu-item.is-dragging { opacity: 0.6; }
+
+/* 指针拖动期间固定外层几何；静止时仍保留原有晃动效果。 */
+.menu-grid,
+.nav-btn { touch-action: none; }
+
+.menu-grid { align-content: start; }
+
+.artboard img { -webkit-user-drag: none; user-select: none; }
+
+.artboard.is-pointer-gesture .menu-grid .menu-item,
+.artboard.is-settling .menu-grid .menu-item {
+  animation: none;
+  transform: none;
+}
+
+.artboard.is-pointer-dragging,
+.artboard.is-pointer-dragging .menu-item,
+.artboard.is-pointer-dragging .nav-btn { cursor: grabbing; user-select: none; }
+
+.artboard.is-pointer-dragging .nav-btn { transition: none; }
+
+.artboard.is-pointer-dragging .menu-item:hover .card-inner,
+.artboard.is-pointer-dragging .menu-item:focus-visible .card-inner,
+.artboard.is-pointer-dragging .nav-btn:hover::before,
+.artboard.is-pointer-dragging .nav-btn:focus-visible::before { outline: none; }
+
+.is-drag-source > * { opacity: 0; }
+.is-drag-source::before { visibility: hidden; }
+
+/* 位置只由当前指针写入，不对位移做缓动或追赶。 */
+.drag-ghost {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.92;
+  transition: none;
+  animation: none;
+  will-change: transform;
+  filter: drop-shadow(0 14px 18px rgba(2, 6, 18, 0.5));
+}
+
+.drag-ghost * {
+  pointer-events: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.drag-ghost > .menu-item,
+.drag-ghost > .nav-btn {
+  position: absolute;
+  left: 0 !important;
+  top: 0 !important;
+  margin: 0;
+  transform: none !important;
+}
+
+.drag-ghost .card-inner { transform: none; outline: none; }
+
+.landing-flight {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 61;
+  transform-origin: 0 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.landing-flight img { position: absolute; pointer-events: none; }
+
+.landing-outline {
+  position: absolute;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.artboard.is-settling .menu-item,
+.artboard.is-settling .nav-btn { cursor: default; transition: none; }
+
+.artboard.is-settling .menu-item .card-inner,
+.artboard.is-settling .nav-btn::before { outline: none; }
+
+/* ===== 状态条 ===== */
+.status {
+  position: absolute;
+  left: 50%;
+  top: 930px;
+  min-width: 360px;
+  margin: 0;
+  padding: 12px 20px;
+  border: 1px solid rgba(206, 232, 255, 0.42);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.96);
+  background: rgba(8, 15, 35, 0.78);
+  box-shadow: 0 12px 32px rgba(1, 5, 18, 0.38);
+  font-size: 24px;
+  line-height: 1.3;
+  text-align: center;
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.status.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== 屏幕居中提示 972×93（96-88163） ===== */
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-width: 972px;
+  height: 93px;
+  padding: 0 54px;
+  border-radius: 75px;
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.2);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.96);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+
+.toast.is-visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+/* 文案 42px，两端各一个 6×6 方点 */
+.toast-text {
+  color: #fff;
+  font-size: 42px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.toast-dot { width: 6px; height: 6px; }
+
+@media (max-width: 700px) {
+  body { overflow: auto; }
+  .viewport { min-width: 100vw; min-height: 100vh; }
+}

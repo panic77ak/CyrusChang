@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>娱乐玩法 · 可交互原型</title>
+<style>
+  :root { --accent: #ffd54a; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #0b0d12;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    user-select: none;
+  }
+  .stage {
+    position: relative;
+    width: min(100vw, calc((100vh - 90px) * 2));
+    aspect-ratio: 2 / 1;
+    background: #000;
+    box-shadow: 0 0 80px rgba(0,0,0,.7);
+    overflow: hidden;
+    touch-action: none;
+  }
+  .view { position: absolute; inset: 0; }
+
+  .bg-fallback {
+    position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(120% 90% at 70% 30%, #2a3550 0%, #1b2236 45%, #0c101c 100%);
+    opacity: 0; transition: opacity .3s ease;
+  }
+  .bg-fallback.show { opacity: 1; }
+  #bgVideo {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; pointer-events: none;
+  }
+
+  /* 下半屏模糊渐变：视频背景从 50% 处开始向下渐强模糊（毛玻璃景深） */
+  .blur-bottom {
+    position: absolute; left: 0; top: 50%; width: 100%; height: 50%;
+    z-index: 3; pointer-events: none;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+  }
+
+  .ui {
+    position: absolute; pointer-events: none;
+    width: auto; height: auto;
+    -webkit-user-drag: none; user-select: none;
+  }
+  .hotspot { position: absolute; cursor: pointer; z-index: 20; }
+  #cardSelected { transition: left .38s cubic-bezier(.4,0,.2,1); }
+
+  /* 进场动画：今日挑战(Frame 1933544482) + 文本标题 + 开始游戏，错开上移淡入 */
+  .anim-in { opacity: 0; }
+  .anim-in.play { animation: enterUp .5s cubic-bezier(.22,1,.36,1) both; }
+  #titleImg.play   { animation-delay: 0s;   }   /* 今日挑战 先出现 */
+  #levelTitle.play { animation-delay: .12s; }   /* 文本标题 次之 */
+  #startBtn.play, #notopenBtn.play { animation-delay: .18s; }   /* 开始游戏/暂未开启 最后出现 */
+  @keyframes enterUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hide { display: none !important; }
+
+  /* 兑换 / 积分 界面层 */
+  .screen { position: absolute; inset: 0; z-index: 40; display: none; }
+  .screen.show { display: block; }
+  .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; -webkit-user-drag: none; }
+  .screen .hotspot { z-index: 41; }
+
+  /* 排行榜：从右侧滑入，停靠右侧 */
+  /* 透明点击层：不再有黑色遮罩，仅用于点击空白处关闭排行榜 */
+  .mask {
+    position: absolute; inset: 0; z-index: 50;
+    background: transparent; opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .mask.show { opacity: 1; pointer-events: auto; }
+  .rank-panel {
+    position: absolute; top: 0; right: 0; z-index: 60;
+    width: 45.23%; height: 100%;
+    transform: translateX(100%);
+    transition: transform .42s cubic-bezier(.4,0,.2,1);
+    pointer-events: auto;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .rank-panel.open { transform: translateX(0); }
+  .rank-panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; -webkit-user-drag: none; }
+
+  /* 规则说明 全屏弹窗（覆盖在主界面之上，viewRedeem/viewPoints 之上） */
+  .rules-mask {
+    position: absolute; inset: 0; z-index: 70;
+    background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity .3s;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .rules-mask.show { opacity: 1; pointer-events: auto; }
+  .rules-modal {
+    position: absolute; inset: 0; z-index: 71;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .rules-modal.show { opacity: 1; pointer-events: auto; }
+  .rules-modal img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: fill; -webkit-user-drag: none;
+  }
+  /* 规则弹窗关闭按钮：右上角 X
+     对应 Figma 弹窗整体 frame(2132,5103,2160x1080) 内关闭按钮 26249:118313 (4073.5,5235,42x42)
+     left=(4073.5-2132)/2160=89.88%  top=(5235-5103)/1080=12.22% */
+  .rules-close {
+    position: absolute; left: 89.4%; top: 11.5%; z-index: 72;
+    width: 2.6%; height: 4.8%; cursor: pointer;
+  }
+
+  .topbar {
+    position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+    color: #c8ceda; font-size: 13px; z-index: 100;
+    background: rgba(22,24,30,.78); padding: 6px 16px; border-radius: 20px; letter-spacing: .3px;
+  }
+  .topbar b { color: var(--accent); }
+  .toast {
+    position: fixed; top: 46%; left: 50%; transform: translate(-50%,-50%);
+    background: rgba(0,0,0,.82); color: #fff; font-size: 15px; padding: 12px 26px;
+    border-radius: 12px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 200;
+    box-shadow: 0 6px 24px rgba(0,0,0,.5); white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <!-- ============ 主界面 ============ -->
+  <div class="view" id="viewMain">
+    <div class="bg-fallback" id="fallback"></div>
+    <video id="bgVideo" autoplay muted loop playsinline></video>
+
+    <img class="ui" src="assets/ui/shade-bottom.png" style="left:0;top:60%;width:100.14%;height:40%;z-index:1;">
+    <img class="ui" src="assets/ui/shade-top.png"    style="left:0;top:0;width:100.14%;height:12.04%;z-index:2;">
+    <!-- 下半屏模糊渐变 -->
+    <div class="blur-bottom"></div>
+    <img class="ui" src="assets/ui/topbar.png"       style="left:90.83%;top:3.80%;width:7.08%;height:4.81%;z-index:4;">
+    <img class="ui anim-in" id="titleImg" src="assets/ui/title.png"        style="left:1.85%;top:69.26%;width:35.97%;height:8.43%;z-index:5;">
+    <img class="ui anim-in" id="levelTitle" src="assets/ui/level-title.png"  style="left:2.08%;top:57.13%;width:18.89%;height:7.87%;z-index:5;">
+    <img class="ui" src="assets/ui/btn-title.png"    style="left:2.08%;top:3.61%;width:13.15%;height:5.09%;z-index:6;">
+
+    <!-- BTN-标题 中的详情 icon：点击打开规则说明弹窗
+         Figma 奇异实验室 frame 原点 x=-147,y=2639，BTN-详情 icon 绝对 x=139,y=2686 (42x42)
+         页面内 left=(139-(-147))/2160=13.24%  top=(2686-2639)/1080=4.35%
+         热区在 icon 基础上放大一圈，便于点击 -->
+    <div class="hotspot" style="left:12.46%;top:3.30%;width:3.5%;height:6%;" data-action="rules"></div>
+    <!-- 左上角返回 → 玩法大厅
+         Figma 奇异实验室 BTN-返回 (-102,2681 30x52)，frame 原点 -147,2639
+         left=(-102+147)/2160=2.08% top=(2681-2639)/1080=3.89% -->
+    <div class="hotspot" style="left:2.08%;top:3.61%;width:10.42%;height:5.09%;" data-action="back-hall"></div>
+    <img class="ui" id="cardSelected" src="assets/ui/card-selected.png" style="left:2.13%;top:81.02%;width:21.85%;height:12.96%;z-index:8;">
+    <img class="ui" id="cardsContent" src="assets/ui/cards-content.png" style="left:2.08%;top:81.02%;width:131.44%;height:12.96%;z-index:9;">
+    <img class="ui anim-in" id="startBtn" src="assets/ui/start.png"        style="left:75.56%;top:61.39%;width:23.06%;height:16.30%;z-index:10;">
+    <img class="ui anim-in hide" id="notopenBtn" src="assets/ui/notopen.png"   style="left:75.56%;top:61.39%;width:23.06%;height:16.30%;z-index:10;">
+    <img class="ui" src="assets/ui/rank.png"         style="left:94.12%;top:24.81%;width:3.75%;height:22.31%;z-index:11;">
+
+    <!-- 6 张玩法卡片热区 -->
+    <div class="hotspot card" style="left:2.08%;top:81.02%;width:21.90%;height:12.96%;" data-play="0"></div>
+    <div class="hotspot card" style="left:23.98%;top:81.02%;width:21.90%;height:12.96%;" data-play="1"></div>
+    <div class="hotspot card" style="left:45.88%;top:81.02%;width:21.90%;height:12.96%;" data-play="2"></div>
+    <div class="hotspot card" style="left:67.78%;top:81.02%;width:21.90%;height:12.96%;" data-play="3"></div>
+    <div class="hotspot card" style="left:89.68%;top:81.02%;width:21.90%;height:12.96%;" data-play="4"></div>
+    <div class="hotspot card" style="left:111.58%;top:81.02%;width:21.90%;height:12.96%;" data-play="5"></div>
+
+    <!-- 文本标题 → 积分 -->
+    <div class="hotspot" style="left:2.08%;top:57.13%;width:18.89%;height:7.87%;" data-action="points"></div>
+    <!-- 顶栏入口 → 兑换 -->
+    <div class="hotspot" style="left:90.83%;top:3.80%;width:7.08%;height:4.81%;" data-action="redeem"></div>
+    <!-- 竖按钮 → 排行榜 -->
+    <div class="hotspot" style="left:94.12%;top:24.81%;width:3.75%;height:22.31%;" data-action="rank"></div>
+    <!-- 开始游戏 -->
+    <div class="hotspot" style="left:75.56%;top:61.39%;width:23.06%;height:16.30%;" data-action="start"></div>
+  </div>
+
+  <!-- ============ 玩法大厅（初始界面，覆盖主界面之上） ============ -->
+  <div class="screen show" id="viewHall">
+    <img src="assets/ui/hall.webp">
+    <!-- 「娱乐玩法」入口按钮（右下角）→ 进入奇异实验室
+         Figma 玩法大厅(262:114264) 右下角：娱乐玩法标题(1534,2173 400x122) + 开始游戏按钮(1562,2190 410x138)
+         frame 原点 -147,1282 →
+         合并区域 left=77.8% top=82.5% width=20.3% height=14.3% -->
+    <div class="hotspot" style="left:77.8%;top:82.5%;width:20.3%;height:14.3%;" data-action="enter-lab"></div>
+    <!-- 左上角返回按钮（玩法大厅即首页，保持） -->
+    <div class="hotspot" style="left:2.08%;top:3.61%;width:10.42%;height:5.09%;" data-action="back-hall"></div>
+  </div>
+
+  <!-- ============ 兑换界面 ============ -->
+  <div class="screen" id="viewRedeem">
+    <img src="assets/ui/redeem.webp?v=20260901">
+    <div class="hotspot" style="left:2.08%;top:3.61%;width:10.42%;height:5.09%;" data-action="back"></div>
+  </div>
+
+  <!-- ============ 积分界面 ============ -->
+  <div class="screen" id="viewPoints">
+    <img src="assets/ui/points.webp?v=20260901b">
+    <div class="hotspot" style="left:2.08%;top:3.61%;width:10.42%;height:5.09%;" data-action="back"></div>
+  </div>
+
+  <!-- ============ 排行榜（右侧滑入） ============ -->
+  <div class="mask" id="rankMask"></div>
+  <div class="rank-panel" id="rankPanel">
+    <img src="assets/ui/rank-panel.png">
+  </div>
+
+  <!-- ============ 规则说明（全屏弹窗，6 个玩法共用） ============ -->
+  <div class="rules-mask" id="rulesMask"></div>
+  <div class="rules-modal" id="rulesModal">
+    <img src="assets/ui/rules.webp">
+    <div class="rules-close" data-action="rules-close" title="关闭"></div>
+  </div>
+</div>
+
+<div class="topbar">娱乐玩法 · <b>交互原型</b>　|　点卡片切玩法 · 文本标题进积分 · 顶栏进兑换 · 竖按钮开排行榜</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  const plays = [
+    { name: '奇异实验室', video: 'assets/qiyishiyanshi.mp4',  lock: null },
+    { name: '超级英雄',   video: 'assets/chaojiyingxiong.mp4', lock: null },
+    { name: '惊喜扭蛋',   video: null, lock: null },
+    { name: '惊喜扭蛋',   video: null, lock: '12.16 开启' },
+    { name: '超级英雄',   video: null, lock: '12.24 开启' },
+    { name: '超级英雄',   video: null, lock: '01.30 开启' },
+  ];
+  // 选中框在各卡片上的 left%（对应 Figma 两个状态的选中矩形位置）
+  const SEL_LEFT = [2.13, 24.07, 46.01, 67.95, 89.89, 111.83];
+
+  const bgVideo   = document.getElementById('bgVideo');
+  const fallback  = document.getElementById('fallback');
+  const selected  = document.getElementById('cardSelected');
+  const toast     = document.getElementById('toast');
+  const rankMask  = document.getElementById('rankMask');
+  const rankPanel = document.getElementById('rankPanel');
+  const viewMain  = document.getElementById('viewMain');
+  const viewHall  = document.getElementById('viewHall');
+  const viewRedeem= document.getElementById('viewRedeem');
+  const viewPoints= document.getElementById('viewPoints');
+
+  const cards = document.querySelectorAll('.hotspot.card');
+  const content = document.getElementById('cardsContent');
+  const stage = document.querySelector('.stage');
+  const levelTitle = document.getElementById('levelTitle');
+  const titleImg   = document.getElementById('titleImg');
+  const startBtn   = document.getElementById('startBtn');
+  const notopenBtn = document.getElementById('notopenBtn');
+  let active = 0, toastTimer = null, currentVideo = null;
+
+  // ---- 底部卡片条横向滑动 ----
+  // 内容条：left 2.08% + width 131.44%，右边缘 133.52%，超出屏幕 33.52%
+  const CARDS_TOP = 81.02, CARDS_HEIGHT = 12.96;
+  let dragX = 0, maxDrag = 0;          // 当前平移像素 / 最大可平移像素(负方向)
+  let dragging = false, startX = 0, startDragX = 0, moved = false;
+
+  function trackEls() { return [content, selected, ...cards]; }
+  function updateMaxDrag() { maxDrag = stage.clientWidth * 0.3352; }
+  function applyDrag() {
+    const t = `translateX(${dragX}px)`;
+    trackEls().forEach(el => { el.style.transform = t; });
+  }
+  function inCardsZone(clientX, clientY) {
+    const r = stage.getBoundingClientRect();
+    const y = (clientY - r.top) / r.height * 100;
+    return y >= CARDS_TOP && y <= CARDS_TOP + CARDS_HEIGHT;
+  }
+  // 选中框完整可见所需的平移
+  function ensureVisible(i) {
+    const sw = stage.clientWidth || 1;
+    const selLeft = SEL_LEFT[i], selW = 21.85;
+    let dp = dragX / sw * 100;               // 当前平移(%)
+    const screenLeft = selLeft + dp;
+    const screenRight = screenLeft + selW;
+    if (screenLeft < 0) dp += (-screenLeft);
+    else if (screenRight > 100) dp -= (screenRight - 100);
+    dragX = Math.max(-maxDrag, Math.min(0, dp * sw / 100));
+    applyDrag();
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+
+  // 触发进场动画：今日挑战(Frame 1933544482) + 文本标题 + 开始游戏/暂未开启按钮（错开出现）
+  function replayEnterAnim() {
+    [titleImg, levelTitle, startBtn, notopenBtn].forEach(el => {
+      el.classList.remove('play');
+      void el.offsetWidth;          // 强制重排，确保回到初始态
+    });
+    requestAnimationFrame(() => {
+      [titleImg, levelTitle, startBtn, notopenBtn].forEach(el => el.classList.add('play'));
+    });
+  }
+
+  function setPlay(i) {
+    active = i;
+    selected.style.left = SEL_LEFT[i] + '%';
+    ensureVisible(i);
+    const p = plays[i];
+
+    // 未解锁玩法：开始游戏按钮替换为「暂未开启」
+    const isLock = !!p.lock;
+    startBtn.classList.toggle('hide', isLock);
+    notopenBtn.classList.toggle('hide', !isLock);
+
+    replayEnterAnim();
+
+    if (p.video) {
+      fallback.classList.remove('show');
+      bgVideo.style.display = 'block';
+      if (currentVideo !== p.video) {
+        bgVideo.src = p.video;
+        currentVideo = p.video;
+      }
+      bgVideo.play().catch(() => {});
+    } else {
+      bgVideo.pause();
+      bgVideo.style.display = 'none';
+      fallback.classList.add('show');
+      currentVideo = null;
+    }
+  }
+
+  function showScreen(el) {
+    const wasSub = viewRedeem.classList.contains('show') || viewPoints.classList.contains('show');
+    viewRedeem.classList.remove('show');
+    viewPoints.classList.remove('show');
+    if (el) el.classList.add('show');
+    else if (wasSub) replayEnterAnim();   // 从兑换/积分页返回主界面 → 重播进场动画
+  }
+
+  // 进入奇异实验室（从玩法大厅点击「娱乐玩法」入口）
+  function enterLab() {
+    viewHall.classList.remove('show');
+    viewMain.classList.remove('hide');
+    replayEnterAnim();
+  }
+  // 返回玩法大厅（奇异实验室/娱乐大厅左上角返回）
+  function backToHall() {
+    viewHall.classList.add('show');
+  }
+
+  function openRank() {
+    rankPanel.classList.add('open');
+    rankMask.classList.add('show');
+  }
+  function closeRank() {
+    rankPanel.classList.remove('open');
+    rankMask.classList.remove('show');
+  }
+
+  // ---- 规则说明 弹窗 ----
+  const rulesMask  = document.getElementById('rulesMask');
+  const rulesModal = document.getElementById('rulesModal');
+  function openRules()  { rulesMask.classList.add('show');  rulesModal.classList.add('show');  }
+  function closeRules() { rulesMask.classList.remove('show'); rulesModal.classList.remove('show'); }
+
+  cards.forEach((c, idx) => c.addEventListener('click', () => {
+    if (moved) { moved = false; return; }   // 拖拽结束后不触发点击
+    const p = plays[idx];
+    setPlay(idx);                            // 未解锁也切换背景（开始按钮变为「暂未开启」）
+    if (p.lock) showToast(p.name + ' · ' + p.lock);
+    else if (!p.video) showToast(p.name + ' · 视频待补充');
+  }));
+
+  document.querySelectorAll('.hotspot[data-action]').forEach(h => {
+    h.addEventListener('click', () => {
+      const a = h.dataset.action;
+      if (a === 'start') {
+        const p = plays[active];
+        showToast(p.lock ? (p.name + ' · ' + p.lock) : ('开始游戏 · ' + p.name));
+      }
+      else if (a === 'rank') openRank();
+      else if (a === 'redeem') {
+        showScreen(viewRedeem);
+      }
+      else if (a === 'points') showScreen(viewPoints);
+      else if (a === 'back') { showScreen(null); history.replaceState(null,'',' '); }
+      else if (a === 'enter-lab') enterLab();
+      else if (a === 'back-hall') backToHall();
+      else if (a === 'rules') openRules();
+      else if (a === 'rules-close') closeRules();
+    });
+  });
+
+  rankMask.addEventListener('click', closeRank);
+  rulesMask.addEventListener('click', closeRules);
+  document.querySelector('.rules-close').addEventListener('click', closeRules);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') setPlay((active + 1) % plays.length);
+    if (e.key === 'ArrowLeft')  setPlay((active - 1 + plays.length) % plays.length);
+    if (e.key === 'Escape') { closeRank(); closeRules(); showScreen(null); history.replaceState(null,'',' '); }
+  });
+
+  // ---- 横向拖拽滑动 ----
+  viewMain.addEventListener('pointerdown', e => {
+    if (!inCardsZone(e.clientX, e.clientY)) return;
+    dragging = true; moved = false;
+    startX = e.clientX; startDragX = dragX;
+  });
+  window.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 5) moved = true;
+    dragX = Math.max(-maxDrag, Math.min(0, startDragX + dx));
+    applyDrag();
+  });
+  window.addEventListener('pointerup', () => { dragging = false; });
+  window.addEventListener('pointercancel', () => { dragging = false; });
+  window.addEventListener('resize', () => {
+    updateMaxDrag();
+    dragX = Math.max(-maxDrag, Math.min(0, dragX));
+    applyDrag();
+  });
+
+  updateMaxDrag();
+  setPlay(0);
+  // 支持 #redeem / #points / #rank 直达各界面（方便预览与分享）
+  if (location.hash === '#redeem') showScreen(viewRedeem);
+  else if (location.hash === '#points') showScreen(viewPoints);
+  else if (location.hash === '#rank') openRank();
+  else if (location.hash === '#rules') openRules();
+</script>
+</body>
+</html>
