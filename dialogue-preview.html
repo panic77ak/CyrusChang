@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="常宸对话式作品集首页的交互预览。">
+    <title>对话式首页预览 · 常宸</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="dialogue-preview.css">
+  </head>
+  <body>
+    <div class="dialogue-shell">
+      <header class="site-header">
+        <button class="brand" id="brand-home" type="button" aria-label="返回首页，保留对话记录">CyrusChang</button>
+      </header>
+
+      <main class="main-content" id="main-content">
+        <section class="welcome" id="welcome" aria-labelledby="welcome-title">
+          <div class="welcome-avatar"><img src="assets/cyrus-avatar.jpg" alt="" width="40" height="40"></div>
+          <h1 class="welcome-intro" id="welcome-title">你好，我是常宸，一名体验设计师。我喜欢把复杂的规则和状态一点点理顺，让人知道自己在哪，能做什么，以及下一步会发生什么。<span class="keep-together">至于我在哪儿</span>，似乎没那么重要——或许我可以出现在任何地方，哈哈。</h1>
+        </section>
+        <section class="conversation" id="conversation" aria-label="对话记录" aria-live="polite" hidden></section>
+      </main>
+
+      <div class="composer-wrap">
+        <div class="composer-inner">
+          <div class="quick-topics" aria-label="快捷提问，点击后发送">
+            <button type="button" data-topic="project">项目</button>
+            <button type="button" data-topic="cv">CV</button>
+            <button type="button" data-topic="about">关于</button>
+            <button type="button" data-topic="prototype">原型</button>
+            <button type="button" data-topic="method">AI 与设计</button>
+            <button type="button" data-topic="writing">文章</button>
+          </div>
+          <form class="composer" id="composer" autocomplete="off">
+            <label class="sr-only" for="question">想了解什么？</label>
+            <textarea id="question" name="question" rows="1" placeholder="想了解什么？" maxlength="240"></textarea>
+            <button class="send-button" type="submit" aria-label="发送问题" title="发送问题"><span aria-hidden="true">↑</span></button>
+          </form>
+          <div class="composer-foot">
+            <span>问题会发送给 DeepSeek 处理；回答基于本站公开资料，请打开原页核对重要信息。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="dialogue-preview.js"></script>
+  </body>
+</html>

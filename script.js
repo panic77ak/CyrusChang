@@ -1,3 +1,32 @@
+// Keep the visitor's entry point through content pages, including nested articles.
+(() => {
+  const params = new URLSearchParams(location.search);
+  const via = params.get('via');
+  const isPreview = document.body.classList.contains('home-chat-preview');
+  const context = () => isPreview
+    ? (document.body.classList.contains('is-chat-mode') ? 'chat' : 'preview')
+    : (['chat', 'preview'].includes(via) ? via : null);
+  if (!isPreview && context()) {
+    const back = document.querySelector('a.back');
+    if (back) {
+      back.href = 'index.html';
+      back.textContent = context() === 'chat' ? '← 返回对话' : '← 返回首页';
+      back.dataset.contextBack = 'true';
+    }
+  }
+  const prepare = event => {
+    const link = event.target.closest?.('a[href]');
+    if (!link || link.hasAttribute('download') || link.dataset.contextBack || !context()) return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin || !/^\/[^/]+\.html$/.test(url.pathname) || url.hash && url.pathname === location.pathname) return;
+    if (!['/index.html', '/home-chat-preview.html'].includes(url.pathname)) url.searchParams.set('via', context());
+    link.href = url.href;
+  };
+  document.addEventListener('click', prepare, true);
+  document.addEventListener('pointerdown', prepare, true);
+  document.addEventListener('focusin', prepare);
+})();
+
 const icons = {
 wechat:'<path d="M14.5 9.5c0-4-4-6.5-7.5-5.5S1 7.5 2 11c.4 1.4 1.3 2.4 2.6 3.1L4 17l3-1.5"/><path d="M22 14c0-3-2.7-5-6-5s-6 2-6 5 2.7 5 6 5h1.5l2.5 1-.4-2.1A4.6 4.6 0 0 0 22 14Z"/><path d="M6 8h.01M10 8h.01M14 13h.01M18 13h.01"/>',
 product:'<circle cx="12" cy="12" r="10"/><circle cx="9" cy="8" r="2"/><path d="M5.5 17v-2a3.5 3.5 0 0 1 7 0v2M16 7v10m0-10h2a2.5 2.5 0 0 1 0 5h-2"/>',
