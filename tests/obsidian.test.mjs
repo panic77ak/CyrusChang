@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { authorize, frontmatter, noteSource, retrieve, sourcesFromSnapshot } from '../api/obsidian.mjs';
+import { authorize, frontmatter, noteSource, retrieve, sourcesFromSnapshot } from '../lib/obsidian.mjs';
 
 const manifest = { default_policy: 'deny', allowed_dirs: ['ai/public', 'ai/context', 'ai/reference'],
   denied_dirs: ['ai/private', 'raw', 'ai/public/blocked'], required_frontmatter: ['ai_access', 'source_type', 'owner'] };

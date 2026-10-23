@@ -2,7 +2,7 @@
 import { mkdir, readdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sourcesFromSnapshot } from '../api/obsidian.mjs';
+import { sourcesFromSnapshot } from '../lib/obsidian.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const snapshot = JSON.parse(await readFile(new URL('../.local/obsidian-public.json', import.meta.url), 'utf8'));
@@ -36,8 +36,9 @@ await copyPublic('demos');
 for (const [name, method] of [['chat', 'POST'], ['note', 'GET']]) {
   const dir = path.join(output, 'functions/api', name + '.func');
   await mkdir(path.join(dir, 'api'), { recursive: true });
+  await mkdir(path.join(dir, 'lib'), { recursive: true });
   await mkdir(path.join(dir, '.local'), { recursive: true });
-  for (const source of ['api/chat.mjs', 'api/stream.mjs', 'api/note.mjs', 'api/obsidian.mjs', 'chat-knowledge.cjs']) {
+  for (const source of ['api/chat.mjs', 'api/note.mjs', 'lib/stream.mjs', 'lib/obsidian.mjs', 'chat-knowledge.cjs']) {
     await copyFile(path.join(root, source), path.join(dir, source));
   }
   await writeFile(path.join(dir, '.local/obsidian-public.json'), JSON.stringify(snapshot));

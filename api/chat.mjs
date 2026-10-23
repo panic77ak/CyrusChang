@@ -1,6 +1,6 @@
 import knowledge from '../chat-knowledge.cjs';
-import { streamReply } from './stream.mjs';
-import { loadObsidianSources, retrieve } from './obsidian.mjs';
+import { streamReply } from '../lib/stream.mjs';
+import { loadObsidianSources, retrieve } from '../lib/obsidian.mjs';
 
 const MAX_BODY_BYTES = 8_192;
 const MAX_MESSAGE_LENGTH = 500;

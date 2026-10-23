@@ -1,4 +1,4 @@
-import { loadObsidianSources } from './obsidian.mjs';
+import { loadObsidianSources } from '../lib/obsidian.mjs';
 
 const escape = value => value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 

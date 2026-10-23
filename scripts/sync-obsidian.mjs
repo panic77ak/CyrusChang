@@ -1,7 +1,7 @@
 // Optional repeatable refresh. Keep the read-only repository token server-side.
 // Usage: OBSIDIAN_GITHUB_TOKEN=<from secure environment> node scripts/sync-obsidian.mjs
 import { mkdir, writeFile, rename } from 'node:fs/promises';
-import { authorize, snapshotFile, validManifest } from '../api/obsidian.mjs';
+import { authorize, snapshotFile, validManifest } from '../lib/obsidian.mjs';
 
 const repository = 'panic77ak/obsidian-notes';
 const token = process.env.OBSIDIAN_GITHUB_TOKEN;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { partialAnswer, streamReply } from '../api/stream.mjs';
+import { partialAnswer, streamReply } from '../lib/stream.mjs';
 
 test('partial JSON hides metadata and handles split escapes', () => {
   assert.equal(partialAnswer('{"answer":"你好\\u4'), '你好');
