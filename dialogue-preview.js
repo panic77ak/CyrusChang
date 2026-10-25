@@ -147,6 +147,32 @@ function routeQuestion(value) {
   return null;
 }
 
+const greetingSuggestions = [
+  { prompt: replies.project.prompt, topic: 'project' },
+  { prompt: replies.cv.prompt, topic: 'cv' },
+  { prompt: replies.method.prompt, topic: 'method' }
+];
+
+function appendGreetingSuggestions(target, askedPrompts = new Set()) {
+  if (target.body.querySelector('.greeting-suggestions')) return;
+  const available = greetingSuggestions.filter(({ prompt }) => !askedPrompts.has(prompt));
+  if (!available.length) return;
+  const prompts = document.createElement('div');
+  prompts.className = 'follow-up-questions greeting-suggestions';
+  prompts.setAttribute('aria-label', '你可以这样问');
+  available.forEach(({ prompt, topic }) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = prompt;
+    button.addEventListener('click', () => {
+      button.remove();
+      sendMessage(prompt, topic);
+    });
+    prompts.append(button);
+  });
+  target.body.append(prompts);
+}
+
 function addUserMessage(value) {
   const message = document.createElement('div');
   message.className = 'message message--user';
@@ -654,8 +680,11 @@ contactLauncher?.addEventListener('click', () => {
     return;
   }
   startConversation();
-  const greeting = '嗨，我是 C · AI FRIEND，常宸的网站 AI 分身。你可以问我的项目、具体负责的部分，或工作经历。想先了解哪一项？';
-  renderAssistantMessage(makeAssistantMessage(), greeting, [], null);
+  const greeting = '嗨，我是 C · AI FRIEND，常宸的网站 AI 分身。可以从下面选一个问题，也可以直接问我。';
+  const target = makeAssistantMessage();
+  renderAssistantMessage(target, greeting, [], null);
+  appendGreetingSuggestions(target);
+  target.message.dataset.record = JSON.stringify({ role: 'assistant', answer: greeting, sources: [], topic: null, greeting: true });
   history.push({ role: 'assistant', content: greeting });
   saveConversation();
 });
@@ -665,6 +694,7 @@ if (chatDock) {
   try {
     const saved = JSON.parse(sessionStorage.getItem(sessionKey) || sessionStorage.getItem('cyrus-chat-v1:/home-chat-preview.html'));
     if (saved && Date.now() - saved.updated < 86400000 && Array.isArray(saved.messages)) {
+      const askedPrompts = new Set(saved.messages.filter(item => item.role === 'user').map(item => item.answer));
       for (const item of saved.messages.slice(-80)) {
         if (typeof item.answer !== 'string') continue;
         if (item.role === 'user') addUserMessage(item.answer);
@@ -675,6 +705,7 @@ if (chatDock) {
           });
           renderAssistantMessage(target, item.answer, sources, item.topic, item.request || '');
           if (item.prepared && replies[item.topic]) target.body.innerHTML = replies[item.topic].html;
+          if (item.greeting) appendGreetingSuggestions(target, askedPrompts);
           if (item.preview) target.message.querySelector('.message-heading').textContent = 'C · AI FRIEND · 内容预览';
           target.message.dataset.record = JSON.stringify(item);
           if (item.interrupted) {
